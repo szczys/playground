@@ -1,6 +1,9 @@
 import queue
 
-stacks = [None, queue.LifoQueue(),queue.LifoQueue(),queue.LifoQueue(),queue.LifoQueue(),queue.LifoQueue(),queue.LifoQueue(),queue.LifoQueue(),queue.LifoQueue(),queue.LifoQueue()]
+def get_fresh_stacks():
+    return [None, queue.LifoQueue(),queue.LifoQueue(),queue.LifoQueue(),queue.LifoQueue(),queue.LifoQueue(),queue.LifoQueue(),queue.LifoQueue(),queue.LifoQueue(),queue.LifoQueue()]
+
+stacks = get_fresh_stacks()
 
 def get_input():
     with open("day5_input.txt", "r") as f:
@@ -17,10 +20,12 @@ def load_queues(l):
             if this_char != ' ':
                 stacks[j+1].put(this_char)
 
-def print_top_boxes():
+def get_top_boxes():
+    outstring = ""
     for i in range(1,10):
         if not stacks[i].empty():
-            print(stacks[i].get(), end='')
+            outstring += stacks[i].get()
+    return outstring
 
 def parse_instruction(l):
     inst = l.split(' ')
@@ -36,8 +41,27 @@ def process_moves(l):
             continue
         operate(parse_instruction(i))
 
+def operate_multiple_boxes(code):
+    liftqueue = queue.LifoQueue()
+    for i in range(code[0]):
+        liftqueue.put(stacks[code[1]].get())
+    while not liftqueue.empty():
+        stacks[code[2]].put(liftqueue.get())
+
+def process_moves_9001(l):
+    for i in l:
+        if not i.startswith("move"):
+            continue
+        operate_multiple_boxes(parse_instruction(i))
+
 lines = get_input()
 load_queues(lines)
 process_moves(lines)
-print_top_boxes()
+print("Cranemover 9000:", get_top_boxes())
+
+lines = get_input()
+stacks = get_fresh_stacks()
+load_queues(lines)
+process_moves_9001(lines)
+print("Cranemover 9001:", get_top_boxes())
 
