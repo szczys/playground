@@ -74,6 +74,25 @@ class CommandParser:
             size += self.find_dirs_ofsize(size_limit, dir.get_subdir(d))
         return size
 
+    def find_dirs_atleast(self, size_limit, dir=root_dir):
+        size = dir.get_size()
+        return_sizes = []
+        if size >= size_limit:
+            print(dir.get_name(), size)
+            return_sizes.append(size)
+
+        for d in dir.get_subdir_list():
+            return_sizes += self.find_dirs_atleast(size_limit, dir.get_subdir(d))
+        return return_sizes
+
+    def free_up_space(self, space_needed, disk_size=70000000):
+        used_size = self.get_dir_size()
+        target = space_needed-(disk_size-used_size)
+        print("Looking for: ", space_needed)
+        return_set = self.find_dirs_atleast(target)
+        return min(return_set)
+
+
     def crawl_commands(self):
         for c in self.commands:
             tokens = c.split(" ")
@@ -103,3 +122,6 @@ print("\nTotal size:", cp.get_dir_size())
 
 print("\nQuesiton 1:")
 print("Total:", cp.find_dirs_ofsize(100000))
+
+print("\nQuestion 2:")
+print("Smallest:", cp.free_up_space(30000000))
