@@ -63,6 +63,16 @@ class CommandParser:
         for f in sorted(files.keys()):
             print((indent+1)*"  " + "-", f, "(file, size={})".format(files[f]))
 
+    def find_dirs_ofsize(self, size_limit, dir=root_dir):
+        size = dir.get_size()
+        if size <= size_limit:
+            print(dir.get_name(), size)
+        else:
+            size = 0
+
+        for d in dir.get_subdir_list():
+            size += self.find_dirs_ofsize(size_limit, dir.get_subdir(d))
+        return size
 
     def crawl_commands(self):
         for c in self.commands:
@@ -84,9 +94,12 @@ class CommandParser:
             else:
                 self.cur_dir.add_file(tokens[1], tokens[0])
 
-# cp = CommandParser("day7_input.txt")
-cp = CommandParser("day7_test.txt")
+cp = CommandParser("day7_input.txt")
+# cp = CommandParser("day7_test.txt")
 cp.crawl_commands()
 cp.tree()
 
 print("\nTotal size:", cp.get_dir_size())
+
+print("\nQuesiton 1:")
+print("Total:", cp.find_dirs_ofsize(100000))
