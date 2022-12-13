@@ -1,3 +1,5 @@
+from math import floor
+
 class Monkey:
     def __init__(self, num, items, operation, test, m_true, m_false):
         self.num = num
@@ -6,9 +8,39 @@ class Monkey:
         self.test = test
         self.m_true = m_true
         self.m_false = m_false
+        self.inspections = 0
+
+    def catch(self, new_item):
+        self.items.append(new_item)
 
     def print(self):
         print(self.num, self.items, self.operation, self.test, self.m_true, self.m_false)
+
+    def get_inspections(self):
+        return self.inspections
+
+    def operate(self, operand):
+        if self.operation[1] == "old":
+            return operand * operand
+        if self.operation[0] == "+":
+            return operand + int(self.operation[1])
+        if self.operation[0] == "-":
+            return operand - int(self.operation[1])
+        if self.operation[0] == "*":
+            return operand * int(self.operation[1])
+        if self.operation[0] == "/":
+            return operand / int(self.operation[1])
+
+    def process_items(self, monkey_list):
+        while(len(self.items) != 0):
+            current = self.items.pop(0)
+            inspected = self.operate(current)
+            self.inspections += 1
+            inspected = floor(inspected/3)  #divided worry
+            if inspected % self.test == 0:
+                monkey_list[self.m_true].catch(inspected)
+            else:
+                monkey_list[self.m_false].catch(inspected)
 
 class Business:
     def __init__(self, f_name):
@@ -28,14 +60,31 @@ class Business:
 
     def load_chunks(self):
         for i in range(0, len(self.commands), 7):
-            print(self.commands[i:i+7])
             self.store_monkey(self.commands[i:i+7])
 
     def print_monkeys(self):
         for i in self.monkeys:
             self.monkeys[i].print()
 
-b = Business("day11_test.txt")
-# b = Business("day11_input.txt")
+    def go_round(self, iterations):
+        for rpt in range(iterations):
+            for i in self.monkeys:
+                self.monkeys[i].process_items(self.monkeys)
+
+    def print_inspections(self):
+        i_list = list()
+        for i in self.monkeys:
+            work = self.monkeys[i].get_inspections()
+            i_list.append(work)
+            print("Monkey {}: {}".format(i, work))
+        a = i_list.pop(i_list.index(max(i_list)))
+        print("Question 1:", a * max(i_list))
+
+# b = Business("day11_test.txt")
+b = Business("day11_input.txt")
+
 b.load_chunks()
-b.print_monkeys()
+b.go_round(20)
+b.print_inspections()
+# print("")
+# b.print_monkeys()
