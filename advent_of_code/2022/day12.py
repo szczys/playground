@@ -58,7 +58,7 @@ class Maze:
     def get_el(self, point):
         return self.grid[point.y][point.x].get_elevation()
 
-    def get_neighbors(self, p):
+    def get_neighbors(self, p, backwards=False):
         points = list()
         n = self.get_node(p)
         target_el = n.get_elevation()
@@ -73,8 +73,12 @@ class Maze:
 
         valid = list()
         for i in points:
-            if self.get_el(i) < target_el+2:
-                valid.append(i)
+            if (backwards):
+                if self.get_el(i) > target_el-2:
+                    valid.append(i)
+            else:
+                if self.get_el(i) < target_el+2:
+                    valid.append(i)
 
         return valid
 
@@ -96,7 +100,24 @@ class Maze:
         print("No solution found")
         print()
 
+    def bfs_find_a(self):
+        self.visited = [self.end]
+        self.queue = [self.end]
+
+        while self.queue:
+            current_p = self.queue.pop(0)
+            neighbors = self.get_neighbors(current_p, backwards=True)
+            for n in neighbors:
+                if n not in self.visited:
+                    n.depth = current_p.depth+1
+                    if self.get_el(n) == ord('a'):
+                        print("Found end:", n.depth)
+                        return
+                    self.visited.append(n)
+                    self.queue.append(n)
+        print("No solution found")
+        print()
 # m = Maze("day12_test.txt")
 m = Maze("day12_input.txt")
 m.bfs()
-
+m.bfs_find_a()
