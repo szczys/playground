@@ -37,6 +37,26 @@ class Publish:
                     return False
         return True
 
+    def fix_incorrect_entry(self, entry: List[int]) -> List[int]:
+        fixed = entry.copy()
+        is_fixed = False
+        while(not is_fixed):
+            is_fixed = True
+            for i, e in enumerate(fixed):
+                if e not in self.rules:
+                    continue
+                before = fixed[:i]
+                insert_idx = i
+                for r in self.rules[e]:
+                    if r in before:
+                        insert_idx = min(insert_idx, fixed.index(r))
+                if (insert_idx != i):
+                    val = fixed.pop(i)
+                    fixed.insert(insert_idx, val)
+                    is_fixed = False
+                    break
+        return fixed
+
     def sum_of_correct(self) -> int:
         total = 0
         for e in self.entries:
@@ -44,5 +64,12 @@ class Publish:
                 total += self.get_middle(e)
         return total
 
+    def correct_and_sum(self) -> int:
+        total = 0
+        for e in self.entries:
+            if not self.follows_rules(e):
+                total += self.get_middle(self.fix_incorrect_entry(e))
+        return total
+
 p = Publish("day5_input1.txt")
-print(p.sum_of_correct())
+print(p.correct_and_sum())
