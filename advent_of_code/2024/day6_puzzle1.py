@@ -119,9 +119,19 @@ class Maze:
                 unique_blockers.append(next_p)
 
         total = 0
+        source_maze = Maze(self.filename)
+        source_points = list()
         for p in range(1, len(unique_blockers)):
-            test_maze = Maze(self.filename)
+            test_maze = deepcopy(source_maze)
+            test_points = deepcopy(source_points)
+            next_blocker = unique_blockers[p]
+            while((test_maze.head.x != next_blocker.x and
+                   test_maze.head.y != next_blocker.y) and
+                  test_maze.mark_and_move(test_points) == self.CONTINUE):
+                pass
 
+            source_maze = deepcopy(test_maze)
+            source_points = deepcopy(test_points)
             test_maze.maze[unique_blockers[p].y][unique_blockers[p].x] = '#'
 
             test_points = list()
