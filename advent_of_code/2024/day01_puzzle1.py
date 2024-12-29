@@ -18,15 +18,13 @@ class Distance:
         self.list_a = sorted(self.list_a)
         self.list_b = sorted(self.list_b)
 
-    def calculate_occurance(self):
+    def calculate(self):
         total = 0
         for i in range(len(self.list_a)):
-            target = self.list_a[i]
-            total += target * (self.list_b.count(target))
+            total += abs(self.list_a[i] - self.list_b[i])
         return total
 
 
-d = Distance("day1_input1.txt")
+d = Distance("day01_input1.txt")
 d.populate()
-print(d.calculate_occurance())
-
+print(d.calculate())

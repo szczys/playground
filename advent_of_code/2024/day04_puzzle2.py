@@ -51,5 +51,5 @@ class Puzzle:
                     count += 1
         return count
 
-p = Puzzle("day4_input1.txt")
+p = Puzzle("day04_input1.txt")
 print(p.iter_puzzle())

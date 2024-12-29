@@ -27,5 +27,5 @@ class Multiply:
         return total
 
 
-m = Multiply("day3_input1.txt")
+m = Multiply("day03_input1.txt")
 print(m.process())

@@ -99,7 +99,7 @@ class Map:
         # We should never get here
         return -1
 
-m = Map("day8_input1.txt")
+m = Map("day08_input1.txt")
 print(f"Map size: {m.size_x}x{m.size_y}")
 
 antinodes = list()

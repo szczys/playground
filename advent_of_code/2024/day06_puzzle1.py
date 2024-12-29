@@ -147,5 +147,5 @@ class Maze:
                 break
         return total
 
-m = Maze("day6_input1.txt")
+m = Maze("day06_input1.txt")
 print("Total valid blockers found:", m.find_maze_blockers())
