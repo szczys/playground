@@ -69,12 +69,15 @@ class Topo:
 t = Topo("day10_input1.txt")
 heads = t.get_trailheads(t.map)
 print("Trailheads found:", len(heads))
-total_trails = 0
+unique_trailhead_total = 0
+comprehensive_paths = 0
 for h in heads:
     summits = t.path_find(h, t.map)
+    comprehensive_paths += len(summits)
     subtotal = len(set(summits))
-    total_trails += subtotal
-    print(h, "summits:", subtotal)
-print("Total trails:", total_trails)
+    unique_trailhead_total += subtotal
+
+print("Total summits:", unique_trailhead_total)
+print("Total trails:", comprehensive_paths)
 
 
