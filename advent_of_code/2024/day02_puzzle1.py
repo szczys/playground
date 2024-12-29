@@ -21,14 +21,10 @@ class Report:
         count = 0
         for r in self.rows:
             report = [int(i) for i in r.split(' ')]
-            for i in range(len(report)):
-                sub_list = report.copy()
-                sub_list.pop(i)
-                if self.is_safe(sub_list):
-                    count += 1
-                    break
+            if self.is_safe(report):
+                count += 1
 
         return count
 
-r = Report("day2_input1.txt")
+r = Report("day02_input1.txt")
 print(r.calculate())

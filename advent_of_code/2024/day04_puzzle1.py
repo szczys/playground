@@ -66,5 +66,5 @@ class Puzzle:
             total += f.count(word[::-1])
         return total
 
-p = Puzzle("day4_input1.txt")
+p = Puzzle("day04_input1.txt")
 print(p.find_word("XMAS"))

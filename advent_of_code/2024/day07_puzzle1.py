@@ -75,6 +75,6 @@ class Bridge:
                 total += c.solution
         return total
 
-b = Bridge("day7_input1.txt")
+b = Bridge("day07_input1.txt")
 print("Solvable:", b.sum_solvable())
 print("With concat:", b.sum_with_concat())

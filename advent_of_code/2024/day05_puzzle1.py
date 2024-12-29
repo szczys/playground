@@ -71,5 +71,5 @@ class Publish:
                 total += self.get_middle(self.fix_incorrect_entry(e))
         return total
 
-p = Publish("day5_input1.txt")
+p = Publish("day05_input1.txt")
 print(p.correct_and_sum())

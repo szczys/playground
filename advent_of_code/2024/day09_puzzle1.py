@@ -161,7 +161,7 @@ class Disc:
                 idx += 1
         return checksum
 
-d = Disc("day9_input1.txt")
+d = Disc("day09_input1.txt")
 blocks = d.get_blocks(d.map)
 d.defrag(blocks, False)
 print("checksum:", d.get_checksum(blocks))
