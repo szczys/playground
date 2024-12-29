@@ -1,4 +1,5 @@
 from typing import List
+from copy import deepcopy
 
 class Map:
     class Antenna:
@@ -11,7 +12,7 @@ class Map:
             return f"<freq: {self.freq} (x: {self.x}, y: {self.y})>"
 
         def __eq__(self, a):
-            return (self.x == a.x and self.y == a.y and self.freq == a.freq)
+            return (self.x == a.x and self.y == a.y)
 
     def __init__(self, f_name):
         self.filename = f_name
@@ -27,40 +28,88 @@ class Map:
                 if freq != '.':
                     self.towers.append(self.Antenna(x, y, freq))
 
-    def gen_antinodes(self, a, b, antinodes: List):
+    def gen_antinodes(self, a, b, antinodes: List, extended: bool = False):
         center_x = (a.x + b.x) / 2
         center_y = (a.y + b.y) / 2
 
         x_diff = (a.x - b.x)/2
         y_diff = (a.y - b.y)/2
 
-        x_inc = x_diff * 3
-        y_inc = y_diff * 3
+        multiplier = 3
 
-        an0 = self.Antenna(center_x - x_inc, center_y - y_inc, '#')
-        an1 = self.Antenna(center_x + x_inc, center_y + y_inc, '#')
+        while(True):
+            x_inc = x_diff * multiplier
+            y_inc = y_diff * multiplier
 
-        for a in [an0, an1]:
-            if (a not in antinodes and
-                (0 <= a.x < self.size_x) and
-                (0 <= a.y < self.size_y)):
-                antinodes.append(a)
+            an0 = self.Antenna(int(center_x - x_inc), int(center_y - y_inc), '#')
+            an1 = self.Antenna(int(center_x + x_inc), int(center_y + y_inc), '#')
 
-    def calc_antinodes(self) -> int:
-        antinodes = list()
+            valid_count = 0
+
+            for a in [an0, an1]:
+                if a in antinodes:
+                    valid_count += 1
+                    antinodes[antinodes.index(a)].freq = a.freq
+                    continue
+
+                if ((0 <= a.x < self.size_x) and
+                    (0 <= a.y < self.size_y)):
+                    antinodes.append(a)
+                    valid_count += 1
+
+            if not extended or valid_count == 0:
+                return
+            else:
+                multiplier += 2
+
+    def visualize(self, antinodes: List):
+        map = list()
+        for _ in range(self.size_y):
+            map.append([d for d in "." * self.size_x])
+
+        for t in self.towers:
+            map[t.y][t.x] = t.freq
+
+        for a in antinodes:
+            map[a.y][a.x] = a.freq
+
+        for row in map:
+            print("".join(row))
+
+
+    def calc_antinodes(self,
+                       antinodes: List | None = None,
+                       extended: bool = False) -> int:
+        if antinodes is None:
+            antinodes = list()
 
         for i, t in enumerate(self.towers):
             if i == len(self.towers) - 1:
                 return len(antinodes)
 
-            # print(i, len(self.towers[i+1:]))
             for n in self.towers[i + 1:]:
                 if n.freq == t.freq:
-                    self.gen_antinodes(t, n, antinodes)
+                    if extended:
+                        for tower in [t, n]:
+                            if tower not in antinodes:
+                                antinodes.append(deepcopy(tower))
+
+                    self.gen_antinodes(t, n, antinodes, extended)
 
         # We should never get here
         return -1
 
 m = Map("day8_input1.txt")
 print(f"Map size: {m.size_x}x{m.size_y}")
-print("Total antinodes:", m.calc_antinodes())
+
+antinodes = list()
+print()
+print("\tTotal antinodes:", m.calc_antinodes(antinodes))
+m.visualize(antinodes)
+print()
+
+antinodes = list()
+print()
+print("\tTotal antinodes (include harmonics):", m.calc_antinodes(antinodes, True))
+m.visualize(antinodes)
+print()
