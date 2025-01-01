@@ -14,6 +14,11 @@ class Map:
         def __str__(self):
             return f"({self.x}, {self.y}) ({self.v_x}, {self.v_y})"
 
+        def __eq__(self, r):
+            return self.x == r.x and self.y == r.y
+
+        def __hash__(self):
+            return hash((self.x, self.y))
 
     def __init__(self, f_name):
         self.filename = f_name
@@ -60,20 +65,20 @@ class Map:
     def find_easter_egg(self, robots: List, percent: int, size_x: int, size_y: int):
         max_pct = 0
 
-        outside_egg = [int(size_x / 2)]
-        for y in range(1, size_y):
-            pct = y / size_y
-            tree_x_tot = size_x * pct
-            outside_x = size_x - tree_x_tot
-            left_x = int(outside_x / 2)
-            if left_x < 0:
-                left_x = 0
-            outside_egg.append(left_x)
+        outline = list()
+        center_x = int(size_x / 2)
+        increment = (center_x) / (size_y - 1)
+
+        for y in range(size_y):
+            x = int(y * increment)
+            for j in range(x, size_x - x):
+                inverted_y = size_y - 1 - y
+                outline.append(self.Robot(j, inverted_y, 0, 0))
 
         for y in range(size_y):
             outstr = ""
             for x in range(size_x):
-                if outside_egg[y] <= x < size_y - outside_egg[y]:
+                if self.Robot(x,y,0,0) in outline:
                     outstr += "X"
                 else:
                     outstr += "."
@@ -81,6 +86,8 @@ class Map:
 
         iterations = 1
         while(True):
+            if iterations % 10000 == 0:
+                print("Iterations:", iterations)
             center_robots = 0
             for r in robots:
                 r.x = (r.x + (r.v_x)) % size_x
@@ -90,13 +97,10 @@ class Map:
                     r.x = size_x + r.x
                     r.y = size_y + r.y
 
-                if outside_egg[r.y] <= r.x < size_y - outside_egg[r.y]:
-                    center_robots += 1
-
-            inside_pct = ((len(robots) - center_robots) / len(robots)) * 100
-            if inside_pct > max_pct:
-                max_pct = inside_pct
-                print("Iter: {0} {1:.2f}%".format(iterations, inside_pct))
+            center_robots = len(list(set(outline).intersection(robots)))
+            if center_robots > max_pct:
+                max_pct = center_robots
+                inside_pct = (center_robots * 100) / len(outline)
 
                 tree = list()
                 for y in range(size_y):
@@ -108,8 +112,7 @@ class Map:
                 for b in tree:
                     print(''.join(b))
 
-            if inside_pct >= percent:
-                print("Found clump:", iterations)
+                print("Iter: {0} {1:.2f}%".format(iterations, inside_pct))
 
             iterations += 1
 
