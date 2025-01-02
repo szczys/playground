@@ -1,5 +1,7 @@
 from typing import List
 import re
+from sympy import symbols, Eq, solve
+from copy import deepcopy
 
 class Machine:
     class Button:
@@ -44,6 +46,18 @@ class Machine:
                                           )
                                )
 
+    def find_solution(self, prize):
+        a, b = symbols("a b")
+        equation_1 = Eq(((prize.buttons[0].x * a) + (prize.buttons[1].x * b)), prize.x)
+        equation_2 = Eq(((prize.buttons[0].y * a) + (prize.buttons[1].y * b)), prize.y)
+        solution = solve((equation_1, equation_2), (a, b))
+
+        if float(solution[a]).is_integer() and float(solution[b]).is_integer():
+
+            return (solution[a] * prize.buttons[0].cost) + (solution[b] * prize.buttons[1].cost)
+
+        return 0
+
     def calc_lowest_cost(self, machine):
         solutions = list()
 
@@ -67,9 +81,19 @@ class Machine:
     def calc_total_cost(self, arcade):
         total = 0
         for a in arcade:
-            total += self.calc_lowest_cost(a)
+            total += self.find_solution(a)
         return total
 
+    def calc_inflated_cost(self, arcade):
+        total = 0
+        for a in arcade:
+            prize = deepcopy(a)
+            prize.x += 10000000000000
+            prize.y += 10000000000000
+
+            total += self.find_solution(prize)
+        return total
 
 m = Machine("day13_input1.txt")
 print("Total cost of all wins:", m.calc_total_cost(m.arcade))
+print("Inflated cost of all wins:", m.calc_inflated_cost(m.arcade))
