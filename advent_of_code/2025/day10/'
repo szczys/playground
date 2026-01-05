@@ -1,4 +1,3 @@
-import itertools
 import sympy as sp
 
 class Machine:
@@ -55,10 +54,13 @@ class Machine:
     def letter_to_idx(self, letter: chr) -> int:
         return ord(letter) - 97
 
-    def solve_joltage(self):
+    def get_solutions(self):
         symbol_count = len(self.buttons)
         symbol_list = [self.idx_to_letter(i) for i in range(symbol_count)]
+
+        print(' '.join(symbol_list))
         symbols = sp.symbols(' '.join(symbol_list), integer=True)
+
 
         sum_lists = [list() for _ in range(len(self.joltages))]
         for i, b in enumerate(self.buttons):
@@ -69,59 +71,15 @@ class Machine:
         for i, j in enumerate(self.joltages):
             eqs.append(sp.Eq(sum(sum_lists[i]), j))
 
+        print(eqs)
+        print(symbols)
+        print(sum_lists)
         sol = sp.solve(eqs, symbols, dict=True)
- 
-        inputs = list()
+        print(sol)
+
         for i in symbols:
             if i not in sol[0].keys():
-                inputs.append(i)
-
-        guess_buttons = set()
-        for i in inputs:
-            for j in self.buttons[list(symbols).index(i)]:
-                guess_buttons.add(j)
-
-        # This is a speed optimization that may not be doing anything
-        maxes = [self.joltages[x] for x in guess_buttons]
-        if len(maxes) == 0:
-            maxes.append(max(self.joltages))
-
-        combos = itertools.permutations(range(max(maxes)), len(inputs))
-        test_vals = list()
-        for c in list(combos):
-            new = dict()
-            for i, j in enumerate(inputs):
-                new[j] = c[i]
-            test_vals.append(new)
-
-        # solutions = list()
-        print(f"Testing {len(test_vals)} guesses")
-        shortest = 1000000000000
-        for i, t in enumerate(test_vals):
-            if (i % 1000 == 0):
-                print(f"Testing {i}", end="\r")
-            answer = list()
-            for val in t:
-                answer.append(t[val])
-            for s in sol[0].keys():
-                answer.append(sol[0][s].subs(t))
-                if answer[-1] < 0:
-                    # speed optimize
-                    break
-                if sum(answer) > shortest:
-                    answer.append(-1)
-                    # speed optimize
-                    break
-                if answer[-1] % 1 != 0:
-                    # forbid fractions
-                    answer.append(-1)
-                    break
-            if min(answer) >= 0:
-                if sum(answer) < shortest:
-                    shortest = sum(answer)
-
-        print(f"Found solution: {shortest}")
-        return shortest
+                print(i)
 
     def __repr__(self):
         return f"Machine:\n  Lights: {self.lights}\n  Buttons: {self.buttons}\n  Joltages: {self.joltages}"
@@ -142,24 +100,50 @@ class Collective:
         for m in self.machines:
             shortest = m.find_shortest()
             total += shortest
-
-        return total
-
-    def calc_joltages(self):
-        total = 0
-
-        for m in self.machines:
-            shortest = m.solve_joltage()
-            total += shortest
+            print(f"Shortest {m.lights_b:b}: {shortest}")
 
         return total
 
 test_m = Collective('test_input.txt')
-puzzle_m = Collective('puzzle_input.txt')
+# puzzle_m = Collective('puzzle_input.txt')
 
-print()
-print(f"Fewest button presses in test set: {test_m.calc_shortest()}")
-print(f"Fewest button presses in test joltage: {test_m.calc_joltages()}")
-print()
-print(f"Fewest button presses in puzzle set: {puzzle_m.calc_shortest()}")
-print(f"Fewest button presses in puzzle joltage: {puzzle_m.calc_joltages()}")
+# print()
+# print(f"Fewest button presses in test set: {test_m.calc_shortest()}")
+# print()
+# print(f"Fewest button presses in puzzle set: {puzzle_m.calc_shortest()}")
+
+for m in test_m.machines:
+    m.get_solutions()
+
+
+
+'''
+import sympy as sp
+
+i, j, k, L, m, n = sp.symbols('i j k L m n', integer=True)
+
+eqs = [
+    sp.Eq(m + n, 3),
+    sp.Eq(j + n, 5),
+    sp.Eq(k + L + m, 4),
+    sp.Eq(i + j + L, 7),
+]
+
+solution = sp.solve(eqs, (i, j, k, L, m, n), dict=True)
+print(solution)
+'''
+
+'''
+solutions = []
+for n in range(0, 8):
+    for L in range(0, 8):
+        i = 2 + n - L
+        j = 5 - n
+        k = 1 - L + n
+        m = 3 - n
+        if min(i, j, k, m) >= 0:
+            solutions.append((i, j, k, L, m, n))
+
+for s in solutions:
+    print(s)
+'''
