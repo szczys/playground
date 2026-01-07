@@ -1,0 +1,149 @@
+import sympy as sp
+
+class Machine:
+    def __init__(self, initiator: str):
+        self.buttons = list()
+
+        for i in initiator.split():
+            # Use chr() for square bracket so vim indenting doesn't freak out
+            if i[0] == chr(91):
+                self.lights = i[1:-1]
+
+            # Use chr() for parenthesis so vim indenting doesn't freak out
+            elif i[0] == chr(40):
+                button = [int(x) for x in i[1:-1].split(',')]
+                self.buttons.append(button)
+
+            # Use chr() for curly bracket so vim indenting doesn't freak out
+            elif i[0] == chr(123):
+                self.joltages = [int(x) for x in i[1:-1].split(',')]
+
+            else:
+                raise ValueError(f"Failed to parse: {i[0]}")
+
+        self.lights_b = 0b0
+        for i, c in enumerate(self.lights):
+            if c == '#':
+                self.lights_b = self.lights_b | (1<<i)
+
+        self.buttons_b = dict()
+        for i, b in enumerate(self.buttons):
+            bin_val = 0b0
+            for j in b:
+                bin_val = bin_val | (1<<j)
+            self.buttons_b[i] = bin_val
+
+        self.moves = dict()
+        for bb in self.buttons_b:
+            self.moves[self.buttons_b[bb]] = [bb]
+
+    def find_shortest(self):
+        target = self.lights_b
+        while target not in self.moves:
+            moves = [m for m in self.moves.keys()]
+            for i in moves:
+                for j in self.buttons_b:
+                    result = self.buttons_b[j] ^ i
+                    if result not in moves:
+                        self.moves[result] = self.moves[i] + [j]
+        return len(self.moves[target])
+
+    def idx_to_letter(self, idx: int) -> chr:
+        return chr(idx + 97)
+
+    def letter_to_idx(self, letter: chr) -> int:
+        return ord(letter) - 97
+
+    def get_solutions(self):
+        symbol_count = len(self.buttons)
+        symbol_list = [self.idx_to_letter(i) for i in range(symbol_count)]
+
+        print(' '.join(symbol_list))
+        symbols = sp.symbols(' '.join(symbol_list), integer=True)
+
+
+        sum_lists = [list() for _ in range(len(self.joltages))]
+        for i, b in enumerate(self.buttons):
+            for j in b:
+                sum_lists[j].append(symbols[i])
+
+        eqs = list()
+        for i, j in enumerate(self.joltages):
+            eqs.append(sp.Eq(sum(sum_lists[i]), j))
+
+        print(eqs)
+        print(symbols)
+        print(sum_lists)
+        sol = sp.solve(eqs, symbols, dict=True)
+        print(sol)
+
+        for i in symbols:
+            if i not in sol[0].keys():
+                print(i)
+
+    def __repr__(self):
+        return f"Machine:\n  Lights: {self.lights}\n  Buttons: {self.buttons}\n  Joltages: {self.joltages}"
+
+class Collective:
+    def __init__(self, filename):
+        with open(filename, 'r') as f:
+            raw_lines = f.read().splitlines()
+
+        self.machines = list()
+
+        for rl in raw_lines:
+            self.machines.append(Machine(rl))
+
+    def calc_shortest(self):
+        total = 0
+
+        for m in self.machines:
+            shortest = m.find_shortest()
+            total += shortest
+            print(f"Shortest {m.lights_b:b}: {shortest}")
+
+        return total
+
+test_m = Collective('test_input.txt')
+# puzzle_m = Collective('puzzle_input.txt')
+
+# print()
+# print(f"Fewest button presses in test set: {test_m.calc_shortest()}")
+# print()
+# print(f"Fewest button presses in puzzle set: {puzzle_m.calc_shortest()}")
+
+for m in test_m.machines:
+    m.get_solutions()
+
+
+
+'''
+import sympy as sp
+
+i, j, k, L, m, n = sp.symbols('i j k L m n', integer=True)
+
+eqs = [
+    sp.Eq(m + n, 3),
+    sp.Eq(j + n, 5),
+    sp.Eq(k + L + m, 4),
+    sp.Eq(i + j + L, 7),
+]
+
+solution = sp.solve(eqs, (i, j, k, L, m, n), dict=True)
+print(solution)
+'''
+
+'''
+solutions = []
+for n in range(0, 8):
+    for L in range(0, 8):
+        i = 2 + n - L
+        j = 5 - n
+        k = 1 - L + n
+        m = 3 - n
+        if min(i, j, k, m) >= 0:
+            solutions.append((i, j, k, L, m, n))
+
+for s in solutions:
+    print(s)
+'''
