@@ -35,6 +35,10 @@ class Network:
         for s in self.servers:
             s.parse_nodes(self.server_dict)
 
+    def reset_all_routes(self):
+        for s in self.servers:
+            s.routes = 0
+
     def calc_routes(self, start: str, end: str) -> int | None:
         unsolved = dict()
         for s in self.servers:
@@ -64,9 +68,39 @@ class Network:
 
         return solved[id(origin)].routes
 
+    def calculate_path_through_nodes(self, start:str, node1:str, node2:str, end:str) ->int:
+        print()
+        print(f"Caculating routes from {start}, through {node1} and {node2}, to {end}")
+        path1_seg1 = self.calc_routes(start, node1)
+        print(f"\tRoutes from {start} to {node1}: {path1_seg1}")
+        self.reset_all_routes()
+        path1_seg2 = self.calc_routes(node1, node2)
+        print(f"\tRoutes from {node1} to {node2}: {path1_seg2}")
+        self.reset_all_routes()
+        path1_seg3 = self.calc_routes(node2, end)
+        print(f"\tRoutes from {node2} to {end}: {path1_seg3}")
+        self.reset_all_routes()
+
+        print()
+
+        path2_seg1 = self.calc_routes(start, node2)
+        print(f"\tRoutes from {start} to {node1}: {path2_seg1}")
+        self.reset_all_routes()
+        path2_seg2 = self.calc_routes(node2, node1)
+        print(f"\tRoutes from {node2} to {node1}: {path2_seg2}")
+        self.reset_all_routes()
+        path2_seg3 = self.calc_routes(node1, end)
+        print(f"\tRoutes from {node1} to {end}: {path2_seg3}")
+        self.reset_all_routes()
+
+        return (path1_seg1 * path1_seg2 * path1_seg3) + (path2_seg1 * path2_seg2 * path2_seg3)
+
 test_n = Network('test_input.txt')
 puzzle_n = Network('puzzle_input.txt')
+test2_n = Network('test2_input.txt')
 
 print("Total routes in test set:", test_n.calc_routes('you', 'out'))
 print("Total routes in puzzle set:", puzzle_n.calc_routes('you', 'out'))
 
+print("Test set routes through nodes:", test2_n.calculate_path_through_nodes('svr', 'dac', 'fft', 'out'))
+print("Puzzle set routes through nodes:", puzzle_n.calculate_path_through_nodes('svr', 'dac', 'fft', 'out'))
